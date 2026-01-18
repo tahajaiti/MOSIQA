@@ -1,0 +1,168 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-white">Your Library</h1>
+      <p class="text-zinc-400 mt-1">
+        {{ trackService.trackCount() }} {{ trackService.trackCount() === 1 ? 'track' : 'tracks' }}
+      </p>
+    </div>
+    <button
+      class="flex items-center gap-2 px-5 py-2.5 bg-crimson-600 hover:bg-crimson-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-crimson-500/20 hover:shadow-crimson-500/30"
+      (click)="openAddModal()"
+    >
+      <ng-icon name="lucidePlus" size="20"></ng-icon>
+      Add Track
+    </button>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <div class="relative flex-1">
+      <ng-icon
+        name="lucideSearch"
+        size="20"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+      ></ng-icon>
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Search by title or artist..."
+        class="w-full pl-10 pr-10 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-crimson-500 focus:ring-1 focus:ring-crimson-500 transition-colors"
+      />
+      @if (searchQuery()) {
+        <button
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+          (click)="clearSearch()"
+        >
+          <ng-icon name="lucideX" size="18"></ng-icon>
+        </button>
+      }
+    </div>
+
+    <div class="relative">
+      <ng-icon
+        name="lucideFilter"
+        size="18"
+        class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
+      ></ng-icon>
+      <select
+        [ngModel]="selectedCategory()"
+        (ngModelChange)="selectedCategory.set($event)"
+        class="pl-10 pr-8 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white appearance-none focus:outline-none focus:border-crimson-500 focus:ring-1 focus:ring-crimson-500 transition-colors cursor-pointer min-w-[160px]"
+      >
+        <option value="all">All Categories</option>
+        @for (cat of categories; track cat.value) {
+          <option [value]="cat.value">{{ cat.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (trackService.isLoading()) {
+    <div class="flex flex-col items-center justify-center py-20">
+      <div class="w-10 h-10 border-4 border-crimson-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-zinc-400 mt-4">Loading tracks...</p>
+    </div>
+  } @else if (filteredTracks().length === 0) {
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+      <div class="p-4 bg-zinc-900 rounded-full mb-4">
+        <ng-icon name="lucideMusic" size="48" class="text-zinc-600"></ng-icon>
+      </div>
+      @if (trackService.trackCount() === 0) {
+        <h3 class="text-xl font-semibold text-white mb-2">No tracks yet</h3>
+        <p class="text-zinc-400 mb-6 max-w-sm">Add your first track to start building your music library</p>
+        <button
+          class="flex items-center gap-2 px-5 py-2.5 bg-crimson-600 hover:bg-crimson-700 text-white font-medium rounded-lg transition-colors"
+          (click)="openAddModal()"
+        >
+          <ng-icon name="lucidePlus" size="20"></ng-icon>
+          Add Track
+        </button>
+      } @else {
+        <h3 class="text-xl font-semibold text-white mb-2">No tracks found</h3>
+        <p class="text-zinc-400">Try adjusting your search or filter criteria</p>
+      }
+    </div>
+  } @else {
+    <div class="space-y-2">
+      @for (track of filteredTracks(); track track.id) {
+        <app-track-card
+          [track]="track"
+          (edit)="openEditModal($event)"
+          (delete)="openDeleteConfirm($event)"
+          (viewDetails)="viewTrackDetails($event)"
+        ></app-track-card>
+      }
+    </div>
+  }
+</div>
+
+@if (showAddModal()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+    (click)="closeAddModal()"
+  >
+    <div
+      class="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+        <h2 class="text-xl font-semibold text-white">Add New Track</h2>
+        <button
+          class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+          (click)="closeAddModal()"
+        >
+          <ng-icon name="lucideX" size="20"></ng-icon>
+        </button>
+      </div>
+      <div class="p-4">
+        <app-track-form
+          [isLoading]="isSubmitting()"
+          (submitted)="onAddTrack($event)"
+          (cancelled)="closeAddModal()"
+        ></app-track-form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showEditModal()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+    (click)="closeEditModal()"
+  >
+    <div
+      class="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+        <h2 class="text-xl font-semibold text-white">Edit Track</h2>
+        <button
+          class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+          (click)="closeEditModal()"
+        >
+          <ng-icon name="lucideX" size="20"></ng-icon>
+        </button>
+      </div>
+      <div class="p-4">
+        <app-track-form
+          [track]="editingTrack()"
+          [isLoading]="isSubmitting()"
+          (submitted)="onUpdateTrack($event)"
+          (cancelled)="closeEditModal()"
+        ></app-track-form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeleteConfirm()) {
+  <app-confirm-dialog
+    title="Delete Track"
+    [message]="'Are you sure you want to delete \'' + deletingTrack()?.title + '\'? This action cannot be undone.'"
+    confirmText="Delete"
+    [isDestructive]="true"
+    (confirmed)="onDeleteTrack()"
+    (cancelled)="closeDeleteConfirm()"
+  ></app-confirm-dialog>
+}
