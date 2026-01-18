@@ -1,59 +1,171 @@
-# MOSIQA
+# MOSIQA - Local Music Player
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.
+A modern, offline-first music player built with Angular 21 for managing and enjoying your local music collection.
 
-## Development server
+![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=flat-square&logo=angular)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=flat-square&logo=tailwindcss)
+![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex)
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
+- **Complete CRUD Operations**: Add, edit, view, and delete music tracks
+- **Track Details Page**: Dedicated page for viewing full track information
+- **Local Storage**: All data stored in IndexedDB - works completely offline
+- **Audio Player**: Full-featured player with play, pause, next, previous, shuffle, and repeat
+- **Volume Control**: Adjustable volume with mute toggle
+- **Progress Bar**: Seekable progress bar for track navigation
+- **Cover Images**: Optional cover art for each track (PNG, JPEG)
+- **Category Filtering**: Organize tracks by genre (Pop, Rock, Rap, Jazz, etc.)
+- **Search**: Quick search through your library by title or artist
+- **Responsive Design**: Works on desktop and mobile devices
+- **Dark Theme**: Modern black and crimson color scheme
+
+## Tech Stack
+
+- **Framework**: Angular 21 with standalone components
+- **State Management**: Angular Signals + RxJS Observables
+- **Styling**: Tailwind CSS 4
+- **Storage**: IndexedDB via `idb` library
+- **Icons**: Lucide icons via `@ng-icons/lucide`
+- **Forms**: Reactive Forms with validation
+
+## Project Structure
+
+```
+src/app/
+├── core/
+│   ├── models/
+│   │   ├── database.model.ts    # IndexedDB schema
+│   │   ├── player.model.ts      # Audio player state
+│   │   ├── track.model.ts       # Track entity
+│   │   └── index.ts
+│   └── services/
+│       ├── audio-player/        # Audio playback service
+│       ├── storage/             # IndexedDB operations
+│       ├── toast/               # Notifications
+│       ├── track/               # Track CRUD service
+│       └── index.ts
+├── features/
+│   ├── library/                 # Main library page
+│   └── track/                   # Track detail page
+├── layout/
+│   ├── main-layout/             # App shell
+│   └── navbar/                  # Navigation
+├── shared/
+│   ├── components/
+│   │   ├── audio-player/        # Bottom player bar
+│   │   ├── confirm-dialog/      # Confirmation modal
+│   │   ├── toast/               # Toast notifications
+│   │   ├── track-card/          # Track list item
+│   │   └── track-form/          # Add/edit form
+│   ├── pipes/
+│   │   ├── duration.pipe.ts     # Format seconds to mm:ss
+│   │   └── file-size.pipe.ts    # Format bytes
+│   └── index.ts
+├── app.config.ts
+├── app.routes.ts
+└── app.ts
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Getting Started
 
-## Code scaffolding
+### Prerequisites
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js 20+
+- npm 10+
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Installation
 
 ```bash
-ng generate --help
+git clone https://github.com/your-username/MOSIQA.git
+cd MOSIQA
+npm install
+npm start
 ```
 
-## Building
+Open your browser at `http://localhost:4200`
 
-To build the project run:
+## Usage
 
-```bash
-ng build
+### Adding a Track
+
+1. Click the "Add Track" button in the library
+2. Fill in the required fields:
+   - **Title** (required, max 50 characters)
+   - **Artist** (required, max 50 characters)
+   - **Category** (select genre)
+   - **Audio File** (MP3, WAV, OGG - max 10MB)
+3. Optionally add:
+   - **Description** (max 200 characters)
+   - **Cover Image** (PNG, JPEG - max 10MB)
+4. Click "Add Track"
+
+### Playing Music
+
+- Click any track card to view details
+- Click the play button overlay on track cards
+- Use the bottom player bar for playback controls
+- Adjust volume with the slider (desktop)
+
+### Track Details
+
+- Click on a track card or select "View Details" from the menu
+- View full track information including duration, category, and add date
+- Play, edit, or delete tracks from the detail page
+
+### Editing/Deleting
+
+- Hover over a track card and click the menu icon (⋮)
+- Select "Edit" or "Delete"
+- Or use the buttons on the track detail page
+
+## File Constraints
+
+| Type        | Formats       | Max Size |
+| ----------- | ------------- | -------- |
+| Audio       | MP3, WAV, OGG | 10MB     |
+| Cover Image | PNG, JPEG     | 10MB     |
+
+## Architecture
+
+### Services with RxJS
+
+All services use RxJS Observables for async operations:
+
+```typescript
+createTrack(formData: TrackFormData): Observable<Track | null> {
+  return this.storageService.saveAudioFile(audioFileId, formData.audioFile).pipe(
+    switchMap((saved) => {...}),
+    tap((track) => this._tracks$.next([track, ...currentTracks])),
+    catchError((error) => {...})
+  );
+}
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### State Management
 
-## Running unit tests
+Combines Angular Signals with RxJS BehaviorSubject:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+```typescript
+private readonly _tracks$ = new BehaviorSubject<Track[]>([]);
+readonly tracks$ = this._tracks$.asObservable();
+readonly tracks = signal<Track[]>([]);
 
-```bash
-ng test
+constructor() {
+  this._tracks$.subscribe((tracks) => this.tracks.set(tracks));
+}
 ```
 
-## Running end-to-end tests
+### Lazy Loading
 
-For end-to-end (e2e) testing, run:
+All routes are lazy-loaded:
 
-```bash
-ng e2e
+```typescript
+{
+  path: 'library',
+  loadComponent: () =>
+    import('@features/library/library.component')
+      .then((m) => m.LibraryComponent),
+}
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

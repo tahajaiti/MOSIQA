@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { MainLayout } from './layout/main-layout/main-layout';
 
 export const routes: Routes = [
   {
     path: '',
-    component: MainLayout,
+    loadComponent: () =>
+      import('@layout/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     children: [
       {
         path: '',
@@ -13,8 +13,18 @@ export const routes: Routes = [
       },
       {
         path: 'library',
-        loadComponent: () => import('./features/library/library').then((m) => m.Library),
+        loadComponent: () =>
+          import('@features/library/library.component').then((m) => m.LibraryComponent),
+      },
+      {
+        path: 'track/:id',
+        loadComponent: () =>
+          import('@features/track/track.component').then((m) => m.TrackComponent),
       },
     ],
+  },
+  {
+    path: '**',
+    redirectTo: 'library',
   },
 ];

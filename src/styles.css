@@ -1,2 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
+
+@theme {
+  --color-crimson-50: #fef2f2;
+  --color-crimson-100: #fee2e2;
+  --color-crimson-200: #fecaca;
+  --color-crimson-300: #fca5a5;
+  --color-crimson-400: #f87171;
+  --color-crimson-500: #dc143c;
+  --color-crimson-600: #c01236;
+  --color-crimson-700: #a31030;
+  --color-crimson-800: #860e29;
+  --color-crimson-900: #690b21;
+  --color-crimson-950: #4c0818;
+}
