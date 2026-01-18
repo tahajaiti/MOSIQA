@@ -1,0 +1,29 @@
+<nav class="sticky top-0 z-30 bg-zinc-900/80 backdrop-blur-lg border-b border-zinc-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a routerLink="/" class="flex items-center gap-2 group">
+        <div
+          class="p-2 bg-linear-to-br from-crimson-600 to-crimson-700 rounded-lg group-hover:scale-105 transition-transform"
+        >
+          <ng-icon name="lucideMusic2" size="24" class="text-white"></ng-icon>
+        </div>
+        <span
+          class="text-xl font-bold bg-linear-to-r from-white to-zinc-400 bg-clip-text text-transparent"
+        >
+          MOSIQA
+        </span>
+      </a>
+
+      <div class="flex items-center gap-1">
+        <a
+          routerLink="/library"
+          routerLinkActive="bg-zinc-800 text-white"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+        >
+          <ng-icon name="lucideLibrary" size="18"></ng-icon>
+          <span class="hidden sm:inline">Library</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
