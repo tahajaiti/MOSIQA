@@ -1,0 +1,125 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+    (click)="onBackdropClick($event)"
+  >
+    <div
+      class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-zinc-900 border-l border-zinc-800 shadow-2xl flex flex-col animate-slide-in-right"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-crimson-500/20 rounded-lg">
+            <ng-icon name="lucideListMusic" size="20" class="text-crimson-500"></ng-icon>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-white">Queue</h2>
+            <p class="text-xs text-zinc-500">{{ audioPlayer.queue().length }} tracks</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          @if (audioPlayer.queue().length > 0) {
+            <button
+              class="px-3 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+              (click)="clearQueue()"
+            >
+              Clear All
+            </button>
+          }
+          <button
+            class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            (click)="close()"
+          >
+            <ng-icon name="lucideX" size="20"></ng-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        @if (audioPlayer.queue().length === 0) {
+          <div class="flex flex-col items-center justify-center h-full text-center p-8">
+            <div class="p-4 bg-zinc-800 rounded-full mb-4">
+              <ng-icon name="lucideListMusic" size="32" class="text-zinc-600"></ng-icon>
+            </div>
+            <h3 class="text-lg font-medium text-white mb-2">Queue is empty</h3>
+            <p class="text-sm text-zinc-500">Add tracks from your library to start playing</p>
+          </div>
+        } @else {
+          <div class="p-2 space-y-1">
+            @for (track of audioPlayer.queue(); track track.id; let i = $index) {
+              <div
+                class="group flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
+                [class.bg-crimson-500/10]="isCurrentTrack(track)"
+                [class.hover:bg-zinc-800/80]="!isCurrentTrack(track)"
+                (click)="playTrack(track)"
+              >
+                <span class="w-6 text-center text-sm text-zinc-500 tabular-nums">
+                  @if (isCurrentTrack(track)) {
+                    <div class="flex items-center justify-center gap-0.5">
+                      <span class="w-1 h-3 bg-crimson-500 rounded-full animate-pulse"></span>
+                      <span class="w-1 h-4 bg-crimson-500 rounded-full animate-pulse delay-75"></span>
+                      <span class="w-1 h-2 bg-crimson-500 rounded-full animate-pulse delay-150"></span>
+                    </div>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                </span>
+
+                <div class="w-10 h-10 rounded overflow-hidden bg-zinc-800 shrink-0">
+                  @if (getCoverUrl(track.id)) {
+                    <img [src]="getCoverUrl(track.id)" alt="Cover" class="w-full h-full object-cover" />
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-crimson-600/20 to-zinc-800">
+                      <ng-icon name="lucideMusic" size="16" class="text-crimson-500/70"></ng-icon>
+                    </div>
+                  }
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <p
+                    class="text-sm font-medium truncate"
+                    [class.text-crimson-500]="isCurrentTrack(track)"
+                    [class.text-white]="!isCurrentTrack(track)"
+                  >
+                    {{ track.title }}
+                  </p>
+                  <p class="text-xs text-zinc-500 truncate">{{ track.artist }}</p>
+                </div>
+
+                <span class="text-xs text-zinc-500 tabular-nums">{{ track.duration | duration }}</span>
+
+                <button
+                  class="p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-zinc-700 text-zinc-400 hover:text-red-400 transition-all"
+                  (click)="removeFromQueue($event, track)"
+                >
+                  <ng-icon name="lucideTrash2" size="16"></ng-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (audioPlayer.currentTrack()) {
+        <div class="border-t border-zinc-800 p-4">
+          <p class="text-xs text-zinc-500 uppercase tracking-wider mb-2">Now Playing</p>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+              @if (getCoverUrl(audioPlayer.currentTrack()!.id)) {
+                <img [src]="getCoverUrl(audioPlayer.currentTrack()!.id)" alt="Cover" class="w-full h-full object-cover" />
+              } @else {
+                <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-crimson-600/20 to-zinc-800">
+                  <ng-icon name="lucideMusic" size="20" class="text-crimson-500"></ng-icon>
+                </div>
+              }
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-white font-medium truncate">{{ audioPlayer.currentTrack()!.title }}</p>
+              <p class="text-sm text-zinc-400 truncate">{{ audioPlayer.currentTrack()!.artist }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
