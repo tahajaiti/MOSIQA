@@ -1,0 +1,43 @@
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
+  (click)="onBackdropClick($event)"
+>
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate-scale-in">
+    <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+      <div class="flex items-center gap-3">
+        @if (isDestructive()) {
+          <div class="p-2 bg-red-500/20 rounded-lg">
+            <ng-icon name="lucideAlertTriangle" size="20" class="text-red-500"></ng-icon>
+          </div>
+        }
+        <h3 class="text-lg font-semibold text-white">{{ title() }}</h3>
+      </div>
+      <button
+        class="p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
+        (click)="onCancel()"
+      >
+        <ng-icon name="lucideX" size="20"></ng-icon>
+      </button>
+    </div>
+
+    <div class="p-4">
+      <p class="text-zinc-300">{{ message() }}</p>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 p-4 border-t border-zinc-800">
+      <button
+        class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors"
+        (click)="onCancel()"
+      >
+        {{ cancelText() }}
+      </button>
+      <button
+        class="px-4 py-2 rounded-lg font-medium transition-colors"
+        [class]="isDestructive() ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-crimson-600 hover:bg-crimson-700 text-white'"
+        (click)="onConfirm()"
+      >
+        {{ confirmText() }}
+      </button>
+    </div>
+  </div>
+</div>

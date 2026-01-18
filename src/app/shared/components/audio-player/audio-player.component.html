@@ -1,0 +1,121 @@
+@if (audioPlayer.currentTrack()) {
+  <div class="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-lg border-t border-zinc-800 z-40">
+    <div
+      #progressBar
+      class="h-1 bg-zinc-800 cursor-pointer group"
+      (click)="onProgressClick($event)"
+    >
+      <div
+        class="h-full bg-linear-to-r from-crimson-600 to-crimson-500 relative transition-all"
+        [style.width.%]="audioPlayer.progress()"
+      >
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      </div>
+    </div>
+
+    <div class="px-4 py-3">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+            @if (coverUrl()) {
+              <img [src]="coverUrl()" alt="Cover" class="w-full h-full object-cover" />
+            } @else {
+              <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-crimson-600/20 to-zinc-800">
+                <ng-icon name="lucideMusic" size="20" class="text-crimson-500"></ng-icon>
+              </div>
+            }
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-white font-medium truncate text-sm">
+              {{ audioPlayer.currentTrack()?.title }}
+            </h4>
+            <p class="text-zinc-400 text-xs truncate">
+              {{ audioPlayer.currentTrack()?.artist }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button
+            class="p-2 rounded-full transition-colors hidden sm:flex"
+            [class]="shuffleActive ? 'text-crimson-500 hover:text-crimson-400' : 'text-zinc-400 hover:text-white'"
+            (click)="audioPlayer.toggleShuffle()"
+          >
+            <ng-icon name="lucideShuffle" size="18"></ng-icon>
+          </button>
+
+          <button
+            class="p-2 text-zinc-400 hover:text-white transition-colors"
+            (click)="audioPlayer.previous()"
+          >
+            <ng-icon name="lucideSkipBack" size="22"></ng-icon>
+          </button>
+
+          <button
+            class="p-3 bg-white text-black rounded-full hover:scale-105 transition-transform"
+            (click)="togglePlay()"
+          >
+            <ng-icon [name]="audioPlayer.isPlaying() ? 'lucidePause' : 'lucidePlay'" size="22"></ng-icon>
+          </button>
+
+          <button
+            class="p-2 text-zinc-400 hover:text-white transition-colors"
+            (click)="audioPlayer.next()"
+          >
+            <ng-icon name="lucideSkipForward" size="22"></ng-icon>
+          </button>
+
+          <button
+            class="p-2 rounded-full transition-colors hidden sm:flex"
+            [class]="repeatActive ? 'text-crimson-500 hover:text-crimson-400' : 'text-zinc-400 hover:text-white'"
+            (click)="audioPlayer.toggleRepeat()"
+          >
+            <ng-icon [name]="repeatIcon" size="18"></ng-icon>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-xs text-zinc-500 tabular-nums hidden sm:block">
+            {{ audioPlayer.currentTime() | duration }} / {{ audioPlayer.duration() | duration }}
+          </span>
+
+          <div class="hidden md:flex items-center gap-2">
+            <button
+              class="p-1.5 text-zinc-400 hover:text-white transition-colors"
+              (click)="audioPlayer.toggleMute()"
+            >
+              <ng-icon [name]="audioPlayer.isMuted() ? 'lucideVolumeX' : 'lucideVolume2'" size="18"></ng-icon>
+            </button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              [value]="audioPlayer.volume()"
+              (input)="onVolumeChange($event)"
+              class="w-24 h-1 bg-zinc-700 rounded-full appearance-none cursor-pointer accent-crimson-500"
+            />
+          </div>
+
+          <button
+            class="p-2 rounded-lg transition-colors relative"
+            [class]="showQueue() ? 'text-crimson-500 bg-crimson-500/10' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'"
+            (click)="toggleQueue()"
+          >
+            <ng-icon name="lucideListMusic" size="20"></ng-icon>
+            @if (audioPlayer.queue().length > 0) {
+              <span class="absolute -top-1 -right-1 w-4 h-4 bg-crimson-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {{ audioPlayer.queue().length > 9 ? '9+' : audioPlayer.queue().length }}
+              </span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<app-queue-panel
+  [isOpen]="showQueue()"
+  (closed)="closeQueue()"
+></app-queue-panel>
